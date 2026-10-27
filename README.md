@@ -1,66 +1,152 @@
-# Commenter Controller for Project tB
+# MongoDB Commenter for Laravel
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/billy210504/mongodb-commenter.svg?style=flat-square)](https://packagist.org/packages/billy210504/mongodb-commenter)
-[![GitHub Tests Action Status](https://github.com/spatie/package-mongodb-commenter-laravel/actions/workflows/run-tests.yml/badge.svg)](https://github.com/billy210504/mongodb-commenter/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://github.com/spatie/package-mongodb-commenter-laravel/actions/workflows/fix-php-code-style-issues.yml/badge.svg)](https://github.com/billy210504/mongodb-commenter/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![GitHub Tests Action Status](https://github.com/billy210504/mongodb_commenter/actions/workflows/run-tests.yml/badge.svg)](https://github.com/billy210504/mongodb_commenter/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/billy210504/mongodb-commenter.svg?style=flat-square)](https://packagist.org/packages/billy210504/mongodb-commenter)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE.md)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+**MongoDB Commenter** automatically attaches SQLCommenter-style contextual metadata (such as controller, action, route, user, artisan command, and application name) to your MongoDB Eloquent queries in Laravel.
 
-## Support us
+This allows database administrators and monitoring tools (like **MongoDB Atlas Profiler**, **DataDog**, and **APM**) to trace queries back to the exact code location and user context that triggered them.
 
-[<img src="https://spatie.be/github-ad-image/mongodb_commenter.jpg" width="419px" />](https://spatie.be/github-ad-click/mongodb_commenter)
+---
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
+## Features
 
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+- ⚡ **Seamless Integration**: Simply add the `HasComments` trait to your MongoDB Eloquent models.
+- 🏷️ **Contextual Metadata**: Automatically captures `controller`, `action`, `route`, `user`, `command`, and `app_name`.
+- 🔀 **Invokable & Closure Support**: Accurately labels invokable controllers (`__invoke`) and closures.
+- 🎯 **Configurable Tags**: Toggle specific metadata on or off via configuration or `.env` variables.
+- 📋 **Deterministic Order**: Query comments are sorted alphabetically following the SQLCommenter specification.
+
+---
 
 ## Installation
 
-You can install the package via composer:
+You can install the package via Composer:
 
 ```bash
 composer require billy210504/mongodb-commenter
 ```
 
-You can publish and run the migrations with:
+Publish and set up the configuration file using the install command:
 
 ```bash
-php artisan vendor:publish --tag="mongodb-commenter-migrations"
-php artisan migrate
+php artisan mongodb-commenter:install
 ```
 
-You can publish the config file with:
+Or publish the config file directly:
 
 ```bash
 php artisan vendor:publish --tag="mongodb-commenter-config"
 ```
 
-This is the contents of the published config file:
+---
+
+## Configuration
+
+The published configuration file is located at `config/mongodb-commenter.php`:
 
 ```php
 return [
+    /*
+    |--------------------------------------------------------------------------
+    | Enable/Disable MongoDB Query Commenter
+    |--------------------------------------------------------------------------
+    */
+    'enabled' => env('MONGO_COMMENTER_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Custom Application Name (Optional)
+    |--------------------------------------------------------------------------
+    | If null, it will default to config('app.name').
+    */
+    'app_name' => env('MONGO_COMMENTER_APP_NAME', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Included Comment Metadata Tags
+    |--------------------------------------------------------------------------
+    */
+    'include_app_name' => env('MONGO_COMMENTER_INCLUDE_APP_NAME', true),
+    'include_controller' => env('MONGO_COMMENTER_CONTROLLER', true),
+    'include_route' => env('MONGO_COMMENTER_ROUTE', true),
+    'include_user' => env('MONGO_COMMENTER_USER', true),
+    'include_command' => env('MONGO_COMMENTER_COMMAND', true),
 ];
 ```
 
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="mongodb-commenter-views"
-```
+---
 
 ## Usage
 
+### 1. Attach `HasComments` to Your MongoDB Models
+
+Add the `HasComments` trait to any of your MongoDB Eloquent models:
+
 ```php
-$mongodbCommenter = new Billy\MongodbCommenter();
-echo $mongodbCommenter->echoPhrase('Hello, Billy!');
+namespace App\Models;
+
+use Billy\MongodbCommenter\Traits\HasComments;
+use MongoDB\Laravel\Eloquent\Model;
+
+class Product extends Model
+{
+    use HasComments;
+
+    protected $connection = 'mongodb';
+    protected $collection = 'products';
+
+    protected $fillable = [
+        'name',
+        'price',
+        'stock',
+    ];
+}
 ```
 
+### 2. Output Query Comment Examples
+
+#### A. Web / API Request
+
+When running a query inside an HTTP request (e.g. `GET /api/products` handled by `ProductController@index`):
+
+```php
+$products = Product::where('stock', '>', 0)->get();
+```
+
+The MongoDB query will execute with the following comment attached:
+
+```text
+action='index',app_name='Laravel',controller='ProductController',route='products.index',user='10482'
+```
+
+#### B. Artisan Console Command
+
+When executing queries inside an Artisan command (e.g. `php artisan sync:products`):
+
+```php
+$products = Product::all();
+```
+
+The MongoDB query comment will look like:
+
+```text
+app_name='Laravel',command='sync:products'
+```
+
+---
+
 ## Testing
+
+Run the test suite using Pest:
 
 ```bash
 composer test
 ```
+
+---
 
 ## Changelog
 

@@ -1,17 +1,17 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "billy210504/mongodb-commenter",
+    "description": "Commenter Controller for Project tB",
     "keywords": [
-        ":vendor_name",
+        "Billy",
         "laravel",
-        ":package_slug"
+        "mongodb-commenter"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/billy210504/mongodb-commenter",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Billy",
+            "email": "billykurniawan9@gmail.com",
             "role": "Developer"
         }
     ],
@@ -35,13 +35,13 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src/",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories/"
+            "Billy\\MongodbCommenter\\": "src/",
+            "Billy\\MongodbCommenter\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests/",
+            "Billy\\MongodbCommenter\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -63,10 +63,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "Billy\\MongodbCommenter\\MongodbCommenterServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "MongodbCommenter": "Billy\\MongodbCommenter\\Facades\\MongodbCommenter"
             }
         }
     },
